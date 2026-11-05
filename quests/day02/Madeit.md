@@ -28,6 +28,3 @@ through as typed models, and rejects bad ones with a clear reason.
   a bad URL and a missing location reports only the URL error first.
 
 ---
-
-## Original brief
-(the course's text continues here)
