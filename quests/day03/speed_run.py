@@ -12,20 +12,33 @@ from quests.day03 import fake_web
 
 async def fetch_one(url: str) -> tuple[str, int]:
     """TODO 3.1 · Fetch one page with `await fake_web.fetch(url)` and return (url, length of the page)."""
-    raise NotImplementedError
+    page =  await fake_web.fetch(url)
+    return url, len(page)
 
 
 async def fetch_all(urls: list[str]) -> list[tuple[str, int]]:
     """TODO 3.2 · Fetch every url AT THE SAME TIME (hint: asyncio.gather) and return results in the same order."""
-    raise NotImplementedError
+    return await asyncio.gather(*(fetch_one(url) for url in urls))
 
 
 async def fetch_all_limited(urls: list[str], limit: int = 3) -> list[tuple[str, int]]:
     """TODO 3.3 · Same as fetch_all, but never more than `limit` fetches at once (hint: asyncio.Semaphore)."""
-    raise NotImplementedError
+    sem = asyncio.Semaphore(limit)
+
+    async def fetch_with_limit(url: str) -> tuple[str, int]:
+        async with sem:
+            return await fetch_one(url)
+
+    return await asyncio.gather(*(fetch_with_limit(url) for url in urls))
 
 
 async def fetch_all_safe(urls: list[str], timeout: float = 0.5) -> list[tuple[str, int | None]]:
     """TODO 3.4 · Same as fetch_all, but a page that takes longer than `timeout` seconds
     gives (url, None) instead of making everyone wait (hint: asyncio.wait_for and TimeoutError)."""
-    raise NotImplementedError
+    async def fetch_with_timeout(url: str) -> tuple[str, int | None]:
+        try:
+            return await asyncio.wait_for(fetch_one(url), timeout=timeout)
+        except TimeoutError:
+            return url, None
+
+    return await asyncio.gather(*(fetch_with_timeout(url) for url in urls))
